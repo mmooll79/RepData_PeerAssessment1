@@ -115,7 +115,7 @@ steps taken, averaged across all days (y-axis)
 ```r
 x <- sapply(X = split(x = activity$steps, f = as.factor(activity$interval)), 
             FUN = function(x) mean(x, na.rm = TRUE))
-plot(x = x, type = "l")
+plot(x = as.numeric(names(x)), y = x, type = "l", xlab = "5-minute interval", ylab = "av. number of steps")
 ```
 
 ![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
@@ -148,7 +148,85 @@ sum(!complete.cases(activity))
 Imputing missing values I will use a mean value of steps for the 5-minute interval over all days.
 
 
+```r
+activityImp <- activity
+activityImp$steps[is.na(activityImp$steps)] <- x[as.character(activityImp$interval[is.na(activityImp$steps)])]
+summary(activityImp$steps)
+```
 
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00    0.00    0.00   37.38   27.00  806.00
+```
+
+We make now a histogram of the total number of steps taken each day and we calculate and report the mean and median total number of steps taken per day:
+
+```r
+StepsPerDayImp <- sapply(X = split(x = activityImp$steps, f = activityImp$date), 
+                      FUN = function(x) sum(x, na.rm = TRUE))
+mean(StepsPerDayImp)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+median(StepsPerDayImp)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+hist(StepsPerDayImp)
+```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+First we create a new factor variable in the dataset with two levels: **weekday** and 
+**weekend**, indicating whether a given date is a weekday or weekend day (*I used a 
+polish version of R; "sobota" = Saturday, "niedziela" = Sunday*).
+
+
+```r
+activity$dayF <- weekdays(activity$dateD)
+activity$dayF[activity$dayF=="sobota" | activity$dayF=="niedziela"] <- "weekend"
+activity$dayF[activity$dayF!="weekend"] <- "weekday"
+summary(as.factor(activity$dayF))
+```
+
+```
+## weekday weekend 
+##   12960    4608
+```
+
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute 
+interval (x-axis) and the average number of steps taken, averaged across all weekday 
+days or weekend days (y-axis). See the README file in the GitHub repository to see 
+an example of what this plot should look like using simulated data.
+
+
+```r
+activityWD <- activity[activity$dayF == "weekday",]
+xWD <- sapply(X = split(x = activityWD$steps, f = as.factor(activityWD$interval)), 
+            FUN = function(x) mean(x, na.rm = TRUE))
+
+activityWE <- activity[activity$dayF == "weekend",]
+xWE <- sapply(X = split(x = activityWE$steps, f = as.factor(activityWE$interval)), 
+            FUN = function(x) mean(x, na.rm = TRUE))
+par(mfcol = c(1, 2))
+plot(x = as.numeric(names(xWD)), y = xWD, type = "l", main = "Weekdays",
+     xlab = "5-minute interval", ylab = "av. number of steps")
+plot(x = as.numeric(names(xWE)), y = xWE, type = "l", main = "Weekends", 
+     xlab = "5-minute interval", ylab = "av. number of steps")
+```
+
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
+
+
+
 
