@@ -1,25 +1,79 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+Peer Assessment 1
+=================
 
+The following document is my answer for *Peer Assessment 1* during the course *Reproducible Research*. 
 
 ## Loading and preprocessing the data
 
+As a first step let us load a dataset dedicated for this assessment and look for some details of it.
 
+```{r}
+activity <- read.csv("/Volumes/Obraz dysku/2015.02 Coursera/AS1/activity.csv")
+activity$dateD <- as.Date(as.character(activity$date), "%Y-%m-%d")
+summary(activity)
+str(activity)
+```
 
 ## What is mean total number of steps taken per day?
 
+### Calculate the total number of steps taken per day
 
+I can use the fact that now in my dataset dates are stored as factors, so the total 
+number of steps taken per each day is:
+```{r}
+StepsPerDay <- sapply(X = split(x = activity$steps, f = activity$date), 
+                      FUN = function(x) sum(x, na.rm = TRUE))
+print(StepsPerDay)
+```
+
+### A histogram of the total number of steps taken each day
+
+```{r}
+hist(StepsPerDay)
+```
+
+### The mean and median of the total number of steps taken per day
+
+The mean value of the total number of steps taken per day is:
+```{r}
+mean(StepsPerDay)
+```
+
+The median value of the total number of steps taken per day is:
+```{r}
+median(StepsPerDay)
+```
 
 ## What is the average daily activity pattern?
 
+A time series plot of the 5-minute interval (x-axis) and the average number of 
+steps taken, averaged across all days (y-axis)
+
+```{r}
+x <- sapply(X = split(x = activity$steps, f = as.factor(activity$interval)), 
+            FUN = function(x) mean(x, na.rm = TRUE))
+plot(x = x, type = "l")
+```
+
+The 5-minute interval, which on average across all the days in the dataset, 
+contains the maximum number of steps has a number
+
+```{r}
+names(x)[x==max(x)]
+```
 
 
 ## Imputing missing values
 
+The total number of missing values in the dataset is
+```{r}
+sum(!complete.cases(activity))
+```
+
+Imputing missing values I will use a mean value of steps for the 5-minute interval over all days.
+
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
